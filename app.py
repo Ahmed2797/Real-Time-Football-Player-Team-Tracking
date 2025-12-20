@@ -2,13 +2,13 @@ import supervision as sv
 from tqdm import tqdm
 from ultralytics import YOLO
 from sports.common.team import TeamClassifier
+from foatball.utilitis import extrack_player_crops, TeamClassifier
 import cv2
 
 
 SOURCE_VIDEO_PATH = "notex/573e61_0.mp4"
-SOURCE_VIDEO_PATH = "notex/0bfacc_0.mp4"
 TARGET_VIDEO_PATH = "annotated_output_video1.mp4"
-model = YOLO("foatball/weights/foatball350.pt")  # put your trained weights here
+model = YOLO("foatball/weights/foatball350.pt")  
 
 
 # EXTRACT PLAYER CROPS FUNCTION
@@ -16,7 +16,7 @@ def extrack_player_crops(source,stride):
     frame_generator = sv.get_video_frames_generator(source,stride=stride)
     crops = []
     for frame in tqdm(frame_generator):  # process only first 100 frames for demo
-        results = model.track(frame, persist=True)[0]
+        results = model.track(frame, persist=True,conf=0.20)[0]
         detections = sv.Detections.from_ultralytics(results)
         detections = detections.with_nms(threshold=0.3,class_agnostic=True)
         detections = detections[ detections.class_id == 2 ]  # keep only class_id 0 (players)
@@ -31,10 +31,8 @@ def extrack_player_crops(source,stride):
 # --------------------------------------------------
 # TRAIN TEAM CLASSIFIER
 crops = extrack_player_crops(SOURCE_VIDEO_PATH,20)
-
 team_classifier = TeamClassifier()
 team_classifier.fit(crops)
-
 print(f"[INFO] Training crops: {len(crops)}")
 
 
@@ -46,13 +44,15 @@ box_referee = sv.BoxAnnotator(color=sv.Color.RED, thickness=2)
 
 ellipse_player = sv.EllipseAnnotator(color=sv.ColorPalette.from_hex(['#00BFFF', '#FF1493', '#FFD700']),
                                     thickness=2)
-triangle_ball = sv.TriangleAnnotator(color=sv.Color.YELLOW,base=25,height=20,outline_thickness=1)
+triangle_ball = sv.TriangleAnnotator(color=sv.Color.YELLOW,base=25,height=20)
 
-#label_player = sv.LabelAnnotator(color=sv.Color.GREY, text_scale=0.3, smart_position=True)
 label_player = sv.LabelAnnotator(
     color=sv.ColorPalette.from_hex(['#00BFFF', '#FF1493']),
     text_color=sv.Color.from_hex('#000000'),
-    text_position=sv.Position.BOTTOM_CENTER
+    text_position=sv.Position.BOTTOM_CENTER,
+    text_scale=0.5,
+    text_thickness=0,text_padding=3,
+    smart_position=True
 )
 label_referee = sv.LabelAnnotator(color=sv.Color.RED, text_scale=0.3, smart_position=True)
 label_goalkeeper = sv.LabelAnnotator(color=sv.Color.GREEN, text_scale=0.3, smart_position=True)
@@ -72,7 +72,7 @@ frame_generator = sv.get_video_frames_generator(SOURCE_VIDEO_PATH)
 
 with video_sink:
     for frame in frame_generator:
-        frame = cv2.resize(frame, (1280, 720))
+        frame = cv2.resize(frame, (1280,720))
         result = model.track(frame,persist=True, conf=0.5)[0]
         detections = sv.Detections.from_ultralytics(result)
 
@@ -97,7 +97,7 @@ with video_sink:
         player_detection.class_id = team_ids   
         print("Team IDs:", set(team_ids))
 
-        
+
         # labels = [
         #     f"{class_name} {confidence:.2f}"
         #     for class_name, confidence
@@ -113,6 +113,10 @@ with video_sink:
         annotated_frame = ellipse_player.annotate(
             scene=annotated_frame,
             detections=player_detection
+        )
+        annotated_frame = triangle_ball.annotate(
+            scene=annotated_frame,
+            detections=ball_detection,
         )
         annotated_frame = box_goalkeeper.annotate(
             scene=annotated_frame,
@@ -137,10 +141,10 @@ with video_sink:
             detections=goalkeeper_detection,
             labels=[f"Goalkeeper {conf:.2f}" for conf in goalkeeper_detection.confidence]
         )
-        annotated_frame = triangle_ball.annotate(
-            scene=annotated_frame,
-            detections=ball_detection,
-        ) #labels=labels)
+        # annotated_frame = triangle_ball.annotate(
+        #     scene=annotated_frame,
+        #     detections=ball_detection,
+        # )
 
         #sv.write_video_frame(TARGET_VIDEO_PATH, annotated_frame)
         video_sink.write_frame(annotated_frame)

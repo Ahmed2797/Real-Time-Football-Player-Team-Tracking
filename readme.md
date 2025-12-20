@@ -38,25 +38,25 @@ This project demonstrates **real-time football player detection, team classifica
 
 ---
 
+## Model
+
+    https://drive.google.com/file/d/1gIQuv32iJtyvfoxLBkG6T2Fklq2P2TBz/view?usp=sharing
+
+## video_dowload
+
+    !gdown -O "0bfacc_0.mp4" "https://drive.google.com/uc?id=12TqauVZ9tLAv8kWxTTBFWtgt2hNQ4_ZF"
+    !gdown -O "2e57b9_0.mp4" "https://drive.google.com/uc?id=19PGw55V8aA6GZu5-Aac5_9mCy3fNxmEf"
+    !gdown -O "08fd33_0.mp4" "https://drive.google.com/uc?id=1OG8K6wqUw9t7lp9ms1M48DxRhwTYciK-"
+    !gdown -O "573e61_0.mp4" "https://drive.google.com/uc?id=1yYPKuXbHsCxqjA9G-S6aeR2Kcnos8RPU"
+    !gdown -O "121364_0.mp4" "https://drive.google.com/uc?id=1vVwjW1dE1drIdd4ZSILfbCGPD4weoNiu"
+
 ## Installation
 
-```bash
-# Clone repo
-git clone https://github.com/Ahmed2797/Real-Time-Football-Player-Team-Tracking.git
-cd Foatball_Player
+    git clone https://github.com/Ahmed2797/Real-Time-Football-Player-Team-Tracking.git
+    conda create -n football python=3.10 -y
+    conda activate football
+    pip install -r requirements.txt
 
-# Create environment
-conda create -n football python=3.10 -y
-conda activate football
+## Final notebook here
 
-# Install dependencies
-pip install -r requirements.txt
-
-
-echo "# Real-Time-Football-Player-Team-Tracking" >> README.md
-git init
-git add .
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/Ahmed2797/Real-Time-Football-Player-Team-Tracking.git
-git push -u origin main
+    https://drive.google.com/file/d/1d33mYdw9VX7agOOGx_PgHp6ZVZykhzdv/view?usp=sharing
